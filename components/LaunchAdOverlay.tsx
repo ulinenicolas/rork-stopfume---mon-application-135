@@ -3,6 +3,7 @@ import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, Text, View }
 import { LinearGradient } from 'expo-linear-gradient';
 import { Flame, Shield, Sparkles } from 'lucide-react-native';
 import Colors from '../constants/colors';
+import { admobConfig } from '../constants/admob';
 
 const overlayTestId = 'launch-ad-overlay';
 const fallbackCardTestId = 'launch-ad-fallback-card';
@@ -10,8 +11,8 @@ const ctaTestId = 'launch-ad-fallback-cta';
 const closeTestId = 'launch-ad-fallback-close';
 
 interface LaunchAdOverlayProps {
-  appId: string;
-  adUnitId: string;
+  appId?: string;
+  adUnitId?: string;
   onClose: () => void;
 }
 
@@ -47,11 +48,19 @@ export default function LaunchAdOverlay({ appId, adUnitId, onClose }: LaunchAdOv
     onClose();
   }, [onClose]);
 
+  const resolvedAppId = appId ?? admobConfig.appId;
+  const resolvedAdUnitId = adUnitId ?? admobConfig.appOpenAdUnitId;
+
   const initializeAdMob = useCallback(async () => {
     if (!visible || status !== 'idle') {
       return;
     }
-    console.log('[LaunchAdOverlay] initialize requested', { platform: Platform.OS, appId, adUnitId });
+    if (!resolvedAppId || !resolvedAdUnitId) {
+      setErrorMessage('Configuration AdMob manquante. Veuillez définir les identifiants dans constants/admob.ts ou via les props.');
+      setStatus('error');
+      return;
+    }
+    console.log('[LaunchAdOverlay] initialize requested', { platform: Platform.OS, appId: resolvedAppId, adUnitId: resolvedAdUnitId });
     setStatus('loading');
     if (Platform.OS === 'web') {
       setErrorMessage('Les annonces AdMob ne sont pas disponibles dans la prévisualisation web. Lancez l’application sur iOS ou Android pour valider.');
@@ -64,7 +73,7 @@ export default function LaunchAdOverlay({ appId, adUnitId, onClose }: LaunchAdOv
       if (module.setTestDeviceIDAsync) {
         await module.setTestDeviceIDAsync('EMULATOR');
       }
-      await module.AdMobInterstitial.setAdUnitID(adUnitId);
+      await module.AdMobInterstitial.setAdUnitID(resolvedAdUnitId);
       await module.AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true });
       setStatus('ready');
       await module.AdMobInterstitial.showAdAsync();
@@ -75,7 +84,7 @@ export default function LaunchAdOverlay({ appId, adUnitId, onClose }: LaunchAdOv
       setErrorMessage('Impossible de charger la publicité d’ouverture. Assurez-vous de compiler avec un client Expo compatible AdMob.');
       setStatus('error');
     }
-  }, [adUnitId, appId, status, visible]);
+  }, [resolvedAdUnitId, resolvedAppId, status, visible]);
 
   useEffect(() => {
     if (status === 'dismissed') {
