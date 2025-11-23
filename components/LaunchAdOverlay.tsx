@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Constants from 'expo-constants';
 import { Flame, Shield, Sparkles } from 'lucide-react-native';
 import Colors from '../constants/colors';
 import { admobConfig } from '../constants/admob';
@@ -50,6 +51,7 @@ export default function LaunchAdOverlay({ appId, adUnitId, onClose }: LaunchAdOv
 
   const resolvedAppId = appId ?? admobConfig.appId;
   const resolvedAdUnitId = adUnitId ?? admobConfig.appOpenAdUnitId;
+  const isExpoGo = Constants.appOwnership === 'expo';
 
   const initializeAdMob = useCallback(async () => {
     if (!visible || status !== 'idle') {
@@ -60,10 +62,15 @@ export default function LaunchAdOverlay({ appId, adUnitId, onClose }: LaunchAdOv
       setStatus('error');
       return;
     }
-    console.log('[LaunchAdOverlay] initialize requested', { platform: Platform.OS, appId: resolvedAppId, adUnitId: resolvedAdUnitId });
+    console.log('[LaunchAdOverlay] initialize requested', { platform: Platform.OS, appId: resolvedAppId, adUnitId: resolvedAdUnitId, ownership: Constants.appOwnership });
     setStatus('loading');
     if (Platform.OS === 'web') {
       setErrorMessage('Les annonces AdMob ne sont pas disponibles dans la prévisualisation web. Lancez l’application sur iOS ou Android pour valider.');
+      setStatus('error');
+      return;
+    }
+    if (isExpoGo) {
+      setErrorMessage('Expo Go n’embarque pas le SDK Google Mobile Ads. Compilez un build personnalisé (Dev Client) ou désactivez temporairement la publicité.');
       setStatus('error');
       return;
     }
@@ -84,7 +91,7 @@ export default function LaunchAdOverlay({ appId, adUnitId, onClose }: LaunchAdOv
       setErrorMessage('Impossible de charger la publicité d’ouverture. Assurez-vous de compiler avec un client Expo compatible AdMob.');
       setStatus('error');
     }
-  }, [resolvedAdUnitId, resolvedAppId, status, visible]);
+  }, [resolvedAdUnitId, resolvedAppId, status, visible, isExpoGo]);
 
   useEffect(() => {
     if (status === 'dismissed') {
