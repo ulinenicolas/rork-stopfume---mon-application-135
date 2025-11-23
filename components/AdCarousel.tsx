@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Sparkles, Wind, Users, LucideIcon } from 'lucide-react-native';
@@ -21,7 +21,7 @@ interface AdCarouselProps {
 export default function AdCarousel({ slots }: AdCarouselProps) {
   const router = useRouter();
   const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollRef = useRef<Animated.ScrollView | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 

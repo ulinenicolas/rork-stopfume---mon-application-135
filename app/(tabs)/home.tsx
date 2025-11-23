@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, Dimensions, TouchableOpacity, AppState, AppStateStatus } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, Animated, Dimensions, TouchableOpacity, AppState, AppStateStatus, LayoutChangeEvent } from 'react-native';
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +20,7 @@ export default function HomeScreen() {
   const { dailyLogs, userData } = useApp();
   const [, setTick] = useState(0);
   const [showLogModal, setShowLogModal] = useState<boolean>(false);
+  const [heroSize, setHeroSize] = useState<{ width: number; height: number }>({ width: width - 40, height: 360 });
   const appState = useRef(AppState.currentState);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
@@ -31,6 +32,16 @@ export default function HomeScreen() {
       anim: new Animated.Value(0),
     }))
   );
+
+  const handleHeroLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width: layoutWidth, height: layoutHeight } = event.nativeEvent.layout;
+    setHeroSize((prev) => {
+      if (prev.width === layoutWidth && prev.height === layoutHeight) {
+        return prev;
+      }
+      return { width: layoutWidth, height: layoutHeight };
+    });
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -125,6 +136,9 @@ export default function HomeScreen() {
       ).start();
     });
   }, [pulseAnim, glowAnim, floatAnim, rotateAnim, particles]);
+
+  const particleBaseX = heroSize.width / 2;
+  const particleBaseY = heroSize.height / 2;
 
   const formatTime = () => {
     const days = Math.floor(stats.daysSinceQuit);
@@ -236,8 +250,8 @@ export default function HomeScreen() {
                     style={[
                       styles.particle,
                       {
-                        left: width / 2 + x,
-                        top: 180 + y,
+                        left: particleBaseX + x - 4,
+                        top: particleBaseY + y - 4,
                         opacity,
                         transform: [{ translateY }, { scale }],
                       },
@@ -252,6 +266,7 @@ export default function HomeScreen() {
               style={styles.heroCard}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
+              onLayout={handleHeroLayout}
             >
               <Animated.View
                 style={[

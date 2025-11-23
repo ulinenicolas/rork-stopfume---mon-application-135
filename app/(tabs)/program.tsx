@@ -103,10 +103,10 @@ export default function ProgramScreen() {
     gradient, 
     iconColor 
   }: { 
-    icon: any; 
+    icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>; 
     title: string; 
     content: string; 
-    gradient: string[]; 
+    gradient: readonly [string, string]; 
     iconColor: string;
   }) => (
     <LinearGradient
