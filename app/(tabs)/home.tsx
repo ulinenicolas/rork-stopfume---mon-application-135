@@ -273,7 +273,7 @@ export default function HomeScreen() {
                   styles.glowCircle,
                   {
                     opacity: glowOpacity,
-                    transform: [{ rotate: spin }],
+                    transform: [{ translateX: -150 }, { translateY: -150 }, { rotate: spin }],
                   },
                 ]}
               />
@@ -600,8 +600,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.glow,
     top: '50%',
     left: '50%',
-    marginLeft: -150,
-    marginTop: -150,
   },
   iconContainer: {
     marginBottom: 16,
