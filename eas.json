@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "node": "18.18.0", // Ajout de la version Node pour la stabilité
+      "autoIncrement": true,
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true" // La variable de correction
+      },
+      "distribution": "store" // Ajouté si manquant dans ta version complète
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
